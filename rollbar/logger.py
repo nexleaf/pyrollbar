@@ -24,9 +24,14 @@ import logging
 import threading
 
 from logging.config import ConvertingDict, ConvertingList, ConvertingTuple
-from typing import Any, cast
+from typing import Any, cast, TYPE_CHECKING
+
+from rollbar.lib import dict_merge
 
 import rollbar
+
+if TYPE_CHECKING:
+    from _typeshed import ExcInfo
 
 
 def check_level(level: str | int) -> int:
@@ -177,10 +182,10 @@ class RollbarHandler(logging.Handler):
                             'trace': {'exception': {'description': message}}
                         }
                     }
-                    payload_data = rollbar.dict_merge(
+                    payload_data = dict_merge(
                         payload_data, message_template, silence_errors=True)
 
-                uuid = rollbar.report_exc_info(exc_info,
+                uuid = rollbar.report_exc_info(cast('ExcInfo', exc_info),
                                                level=level,
                                                request=request,
                                                extra_data=extra_data,
